@@ -1,5 +1,5 @@
 {
-  "name": "@sqala/threedsecure-js",
+  "name": "@paypayhub/sqala-3ds-js",
   "version": "0.2.0",
   "description": "A vanilla library for implementing 3D Secure authentication flows in payment applications",
   "type": "module",
@@ -7,11 +7,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rpo-pay/threedsecure-js.git"
+    "url": "git+https://github.com/paypayhub/sqala-3ds-js.git"
   },
-  "homepage": "https://github.com/rpo-pay/threedsecure-js#readme",
+  "homepage": "https://github.com/paypayhub/sqala-3ds-js#readme",
   "bugs": {
-    "url": "https://github.com/rpo-pay/threedsecure-js/issues"
+    "url": "https://github.com/paypayhub/sqala-3ds-js/issues"
   },
   "keywords": ["3d-secure", "3ds", "payment", "authentication"],
   "exports": {
