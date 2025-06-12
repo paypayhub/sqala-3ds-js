@@ -5,7 +5,6 @@ import {
   type ThreeDSecureParameters,
   type ThreeDSecureResult,
 } from '../types'
-import { ApiService } from './api-service'
 import { ApiServicePolling } from './api-service-polling'
 import { DsMethodService } from './dsmethod-service'
 import { ChallengeService } from './challenge-service'
@@ -20,7 +19,7 @@ export type ThreeDSecureOptions = {
 
 export class ThreeDSecureService {
   private readonly container: HTMLElement
-  private readonly apiService: ApiService
+  private readonly apiService: ApiServicePolling
   private readonly dsMethodService: DsMethodService
   private readonly challengeService: ChallengeService
   private readonly actionMapping = new Map([
