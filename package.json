@@ -1,6 +1,6 @@
 {
   "name": "@paypayhub/sqala-3ds-js",
-  "version": "0.2.0",
+  "version": "0.2.4",
   "description": "A vanilla library for implementing 3D Secure authentication flows in payment applications",
   "type": "module",
   "author": "Sqala",

@@ -18,9 +18,7 @@ export class ApiServicePolling {
   executeAuthentication(parameters: ThreeDSecureParameters, abortSignal: AbortSignal): AsyncIterableIterator<Authentication> {
     const bucket = new Bucket<Authentication>();
     const logger = this.logger.bind(this);
-
     let pollingTimer: ReturnType<typeof setTimeout> | null = null;
-    let lastState: AuthenticationState | null = null;
 
     const stopPolling = () => {
       if (pollingTimer) clearTimeout(pollingTimer)
@@ -29,41 +27,57 @@ export class ApiServicePolling {
 
     const poll = async () => {
       if (abortSignal.aborted) {
-        logger('ApiServicePolling: executeAuthentication - aborted');
-        return stopPolling();
+        logger('ApiService: executeAuthentication - aborted')
+        return stopPolling()
       }
 
       try {
-        const response = await fetch(`${this.baseUrl}/${parameters.id}/status?publicKey=${this.publicKey}`, {
-          method: 'GET',
-          signal: abortSignal,
-          headers: {
-            'Accept': 'application/json',
-          },
-        })
+        const response = await fetch(
+          `${this.baseUrl}/${parameters.id}/listen?publicKey=${this.publicKey}`,
+          {
+            method: 'GET',
+            signal: abortSignal,
+            headers: {
+              'Accept': 'text/event-stream',
+            },
+          }
+        );
 
         if (!response.ok) {
-          logger(`ApiServicePolling: error with HTTP statusCode: ${response.status}`);
+          logger(`ApiService:  failed with status ${response.status}`)
           return;
         }
-        const auth = (await response.json()) as Authentication
-        logger('ApiServicePolling: executeAuthentication - poll result', auth);
+        const text = await response.text();
+        logger('ApiService: executeAuthentication - poll response text', text);
 
-        if (auth.state !== lastState) {
-          lastState = auth.state;
-          bucket.push(auth);
+        const events = text
+          .split('\n')
+          .filter(line => line.startsWith('data: '))
+          .map(line => line.replace(/^data:\s*/, ''))
+
+        for (const eventJson of events) {
+          try {
+            const auth = JSON.parse(eventJson) as Authentication
+            logger('ApiService: executeAuthentication - parsed auth', auth)
+
+            bucket.push(auth)
+
+            if (
+              auth.state === AuthenticationState.Failed ||
+              auth.state === AuthenticationState.AuthorizedToAttempt ||
+              auth.state === AuthenticationState.Completed
+            ) {
+              return stopPolling()
+            }
+          } catch (err) {
+            logger('ApiService: executeAuthentication - JSON parse error', err)
+          }
         }
-        if (
-          auth.state === AuthenticationState.Failed ||
-          auth.state === AuthenticationState.AuthorizedToAttempt ||
-          auth.state === AuthenticationState.Completed
-        ) {
-          return stopPolling();
-        }
-        pollingTimer = setTimeout(poll, this.pollingIntervalMs);
-      } catch (error) {
-        logger('ApiServicePolling: executeAuthentication - poll error', error)
-        return stopPolling()
+        pollingTimer = setTimeout(poll, this.pollingIntervalMs)
+
+      } catch (err) {
+        logger('ApiService: executeAuthentication - fetch error', err)
+        stopPolling()
       }
     }
     poll()
