@@ -6,6 +6,7 @@ import {
   type ThreeDSecureResult,
 } from '../types'
 import { ApiService } from './api-service'
+import { ApiServicePolling } from './api-service-polling'
 import { DsMethodService } from './dsmethod-service'
 import { ChallengeService } from './challenge-service'
 import { Base64Encoder } from './base64-encoder'
@@ -36,7 +37,7 @@ export class ThreeDSecureService {
   ) {
     this.logger('ThreeDSecureService: constructor', options)
     this.container = options.container
-    this.apiService = new ApiService(this.logger, options.publicKey, options.baseUrl)
+    this.apiService = new ApiServicePolling(this.logger, options.publicKey, options.baseUrl)
     this.dsMethodService = new DsMethodService(this.logger, new Base64Encoder())
     this.challengeService = new ChallengeService(this.logger, new Base64Encoder())
   }
