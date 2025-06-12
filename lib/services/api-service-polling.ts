@@ -7,7 +7,7 @@ export type UseApiOptions = {
 }
 
 export class ApiServicePolling {
-  private pollingIntervalMs = 2500
+  private pollingIntervalMs = 3000;
 
   constructor(
     private readonly logger: Logger,
