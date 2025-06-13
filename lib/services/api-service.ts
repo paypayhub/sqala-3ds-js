@@ -21,7 +21,7 @@ export class ApiService {
   executeAuthentication(parameters: ThreeDSecureParameters, externalAbortSignal: AbortSignal): AsyncIterableIterator<Authentication> {
     const logger = this.logger.bind(this);
     logger('ApiService: executeAuthentication (poll mode) - init');
-    const baseURl = 'https://api-site.paypayhub.com/main/v2/payment/three-ds/sqala/poll';
+    const baseURl = 'https://api-services.paypayhub.com/production/v1/three-ds/sqala/poll';
     const url = `${baseURl}/${parameters.id}?publicKey=${this.publicKey}`;
     let isTerminated = false;
     let shouldStop = false;
