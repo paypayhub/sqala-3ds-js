@@ -1,7 +1,6 @@
-import assert from './assert'
-import type { Authentication, Logger } from '../types'
-import { Base64Encoder } from './base64-encoder'
-import { v4 } from 'uuid'
+import type { Authentication, Logger } from '../types';
+import { assert, Base64Encoder } from './utils';
+import { v4 } from 'uuid';
 
 export enum ChallengeWindowSize {
   H400xW250 = '01',
@@ -12,53 +11,44 @@ export enum ChallengeWindowSize {
 }
 
 export class ChallengeService {
-  private iFrame!: HTMLIFrameElement
-  private form!: HTMLFormElement
+  private iFrame?: HTMLIFrameElement;
+  private form?: HTMLFormElement;
 
   constructor(
     private readonly logger: Logger,
     private readonly base64Encoder = new Base64Encoder(),
   ) {}
 
-  private getChallengeWindowSize(container: HTMLElement) {
-    return (
-      (container.clientWidth <= 250 && ChallengeWindowSize.H400xW250) ||
-      (container.clientWidth <= 390 && ChallengeWindowSize.H400xW390) ||
-      (container.clientWidth <= 500 && ChallengeWindowSize.H600xW500) ||
-      (container.clientWidth <= 600 && ChallengeWindowSize.H400xW600) ||
-      ChallengeWindowSize.Fullscreen
-    )
+  private getChallengeWindowSize(container: HTMLElement): ChallengeWindowSize {
+    const width = container.clientWidth;
+    if (width <= 250) return ChallengeWindowSize.H400xW250;
+    if (width <= 390) return ChallengeWindowSize.H400xW390;
+    if (width <= 500) return ChallengeWindowSize.H600xW500;
+    if (width <= 600) return ChallengeWindowSize.H400xW600;
+    return ChallengeWindowSize.Fullscreen;
   }
 
-  async executeChallenge(authentication: Authentication, container: HTMLElement) {
+  async executeChallenge(authentication: Authentication, container: HTMLElement): Promise<void> {
     try {
-      assert(authentication.acsUrl, 'acsUrl is required')
+      assert(authentication.acsUrl, 'acsUrl is required');
+      this.logger('ChallengeService: acsUrl', authentication.acsUrl);
 
       if (this.form?.hasAttribute('data-submitted')) {
-        return
+        this.logger('ChallengeService: form already submitted – skipping');
+        return;
       }
 
-      container.style.position = 'relative'
+      container.style.position = 'relative';
 
-      this.iFrame = document.createElement('iframe')
-      this.iFrame.name = v4()
-      this.iFrame.style.width = '100%'
-      this.iFrame.style.height = '100%'
-      this.iFrame.style.position = 'absolute'
-      this.iFrame.style.top = '0'
-      this.iFrame.style.left = '0'
+      const iframeName = v4();
+      this.iFrame = this.createIFrame(iframeName);
 
-      this.form = document.createElement('form')
-      this.form.style.visibility = 'hidden'
-      this.form.name = v4()
-      this.form.target = this.iFrame.name
-      this.form.action = authentication.acsUrl
-      this.form.method = 'POST'
+      const formName = v4();
+      this.form = this.createForm(authentication.acsUrl, formName, iframeName);
 
-      const input = document.createElement('input')
-      input.type = 'hidden'
-      input.name = 'creq'
-      this.form.appendChild(input)
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'creq';
 
       const data = {
         threeDSServerTransID: authentication.transactionId,
@@ -66,42 +56,65 @@ export class ChallengeService {
         messageVersion: authentication.acsProtocolVersion,
         messageType: 'CReq',
         challengeWindowSize: this.getChallengeWindowSize(container),
-      }
+      };
 
-      input.value = this.base64Encoder.encode(data)
+      input.value = this.base64Encoder.encode(data);
+      this.form.appendChild(input);
 
-      container.appendChild(this.form)
-      container.appendChild(this.iFrame)
+      container.appendChild(this.form);
+      container.appendChild(this.iFrame);
 
       const submitForm = new Promise<void>((resolve, reject) => {
-        this.iFrame.onload = () => {
-          resolve()
-        }
+        this.iFrame!.onload = () => resolve();
+        this.iFrame!.onerror = () => reject(new Error('Failed to execute challenge'));
 
-        this.iFrame.onerror = () => {
-          reject(new Error('Failed to execute challenge'))
-        }
+        this.form!.submit();
+        this.form!.setAttribute('data-submitted', 'true');
+      });
 
-        this.form.submit()
-        // Execute challenge only once, be resilient to PENDING_CHALLENGE event
-        // being sent more than once, just do a no-op afterwards
-        this.form.setAttribute('data-submitted', 'true')
-      })
-
-      await submitForm
+      await submitForm;
     } catch (error) {
-      this.logger('ChallengeService: error', error)
-      throw error
+      this.logger('ChallengeService: error', error);
+      throw error;
     }
   }
 
-  clean() {
-    this.logger('ChallengeService: clean')
+  clean(): void {
+    this.logger('ChallengeService: clean');
     try {
-      this.iFrame?.remove()
-      this.form?.remove()
+      this.iFrame?.remove();
+      this.form?.remove();
+      this.iFrame = undefined;
+      this.form = undefined;
     } catch (error) {
-      this.logger('ChallengeService: clean - error', error)
+      this.logger('ChallengeService: clean - error', error);
     }
+  }
+
+  private createIFrame(name: string): HTMLIFrameElement {
+    const iframe = document.createElement('iframe');
+    iframe.name = name;
+    Object.assign(iframe.style, {
+      width: '100%',
+      height: '100%',
+      position: 'absolute',
+      top: '0',
+      left: '0',
+      border: 'none',
+    });
+    return iframe;
+  }
+
+  private createForm(action: string, name: string, target: string): HTMLFormElement {
+    const form = document.createElement('form');
+    form.name = name;
+    form.target = target;
+    form.action = action;
+    form.method = 'POST';
+    Object.assign(form.style, {
+      display: 'none',
+      visibility: 'hidden',
+    });
+    return form;
   }
 }

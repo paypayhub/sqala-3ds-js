@@ -1,5 +1,6 @@
-export * from './api-service'
-export * from './base64-encoder'
-export * from './dsmethod-service'
-export * from './challenge-service'
-export * from './threedsecure-service'
+
+export * from './utils';
+export * from './api-service';
+export * from './dsmethod-service';
+export * from './challenge-service';
+export * from './threedsecure-service';

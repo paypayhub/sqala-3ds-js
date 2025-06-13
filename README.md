@@ -3,7 +3,6 @@
 ![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)
 ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white)
 
-
 # 3D Secure Vanilla Library
 
 A modern Vanilla library that simplifies the integration of 3D Secure (3DS) authentication for secure payment processing in web applications.
@@ -23,23 +22,28 @@ This library provides a set of utilities to implement 3D Secure authentication f
 ## Installation
 
 ```bash
-npm install @sqala/threedsecure-js
+npm install @paypayhub/sqala-3ds-js
 # or
-yarn add @sqala/threedsecure-js
+yarn add @paypayhub/sqala-3ds-js
 ```
 
 ## Quick Start
 
 ```tsx
-import { ThreeDSecureService } from '@sqala/threedsecure-js';
+import { ThreeDSecureService } from '@paypayhub/sqala-3ds-js';
 
 async function PaymentComponent() {
   const container = document.getElementById('container');
+
+   const eventHandler = (event, data) => {
+    // Handle UI state based on received events
+   };
   
   const threeDSecureService = new ThreeDSecureService({
     baseUrl: 'https://api.sqala.tech/core/v1/threedsecure',
-    publicKey: 'your-public-key',
-    container: container
+    publicKey: 'YOUR-PUBLIC-KEY',
+    container,
+    eventHandler,
   });
 
   const result = await threeDSecureService.execute({
@@ -61,7 +65,7 @@ async function PaymentComponent() {
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/rpo-pay/threedsecure-js.git
+   git clone https://github.com/paypayhub/sqala-3ds-js.git
    cd threedsecure-js
    ```
 
@@ -72,25 +76,12 @@ async function PaymentComponent() {
    yarn
    ```
 
-3. Start the development server:
-   ```bash
-   npm run start:dev
-   # or
-   yarn start:dev
-   ```
-
-This will concurrently:
-- Build the library TypeScript files
-- Watch for changes in the lib folder
-- Start Vite's development server
-
 ### Project Structure
 
 ```
-threedsecure-js/
+sqala-3ds-js/
 ├── lib/                  # Library source code
 │   ├── services/         # Service implementation
-│   ├── models/           # Data models
 │   ├── types/            # TypeScript type definitions
 │   └── main.ts           # Main entry point
 ├── src/                  # Demo application
@@ -98,23 +89,6 @@ threedsecure-js/
 ├── .vscode/              # VS Code configuration
 ├── tsconfig.lib.json     # TypeScript config for the library
 └── vite.config.ts        # Vite configuration
-```
-
-## Debugging
-
-The project is configured with source maps for easy debugging. When using VS Code:
-
-1. Open the project in VS Code
-2. Set breakpoints in your code
-3. Press F5 to start debugging (this launches Edge with the development server)
-4. The debug session will automatically terminate the development server when stopped
-
-## Running Tests
-
-```bash
-npm run test
-# or
-yarn test
 ```
 
 ## Building for Production
