@@ -17,7 +17,7 @@ export class ChallengeService {
   constructor(
     private readonly logger: Logger,
     private readonly base64Encoder = new Base64Encoder(),
-  ) {}
+  ) { }
 
   private getChallengeWindowSize(container: HTMLElement): ChallengeWindowSize {
     const width = container.clientWidth;
@@ -37,7 +37,6 @@ export class ChallengeService {
         this.logger('ChallengeService: form already submitted – skipping');
         return;
       }
-
       container.style.position = 'relative';
 
       const iframeName = v4();
@@ -65,7 +64,10 @@ export class ChallengeService {
       container.appendChild(this.iFrame);
 
       const submitForm = new Promise<void>((resolve, reject) => {
-        this.iFrame!.onload = () => resolve();
+        this.iFrame!.onload = () => {
+          this.logger('ChallengeService: iFrame loaded');
+          resolve();
+        };
         this.iFrame!.onerror = () => reject(new Error('Failed to execute challenge'));
 
         this.form!.submit();
