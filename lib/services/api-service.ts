@@ -45,7 +45,7 @@ export class ApiService {
           return { done: true, value: undefined };
         }
         const MAX_RETRIES = 10;
-        const RETRY_INTERVAL_MS = 1500;
+        const RETRY_INTERVAL_MS = 800;
         let retries = 0;
 
         while (!isTerminated && !shouldStop && retries < MAX_RETRIES) {

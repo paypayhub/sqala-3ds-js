@@ -74,7 +74,7 @@ export class ThreeDSecureService {
         const action = this.actionMapping.get(authentication.state);
         await action?.(authentication, abortController);
         this.logger(`ThreeDSecureService: flowStep - ${authentication.state} - end`);
-        await delay(/PENDING_CHALLENGE/.test(authentication.state) ? 1000 : 7500);
+        await delay(/PENDING_CHALLENGE/.test(authentication.state) ? 2250 : 5000);
       }
 
       this.logger('ThreeDSecureService: authentication completed successfully');
