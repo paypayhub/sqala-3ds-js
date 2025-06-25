@@ -14,7 +14,7 @@ export default defineConfig({
     }),
   ],
   build: {
-    target: 'es2015',
+    target: ['es2015', 'safari12', 'chrome58'],
     copyPublicDir: false,
     lib: {
       entry: resolve(__dirname, 'lib/main.ts'),

@@ -10,7 +10,7 @@ export class DsMethodService {
   constructor(
     private readonly logger: Logger,
     private readonly base64Encoder: Base64Encoder,
-  ) { }
+  ) {}
 
   async executeDsMethod(authentication: Authentication, container: HTMLElement) {
     try {

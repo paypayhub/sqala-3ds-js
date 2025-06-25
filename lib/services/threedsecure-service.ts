@@ -49,7 +49,7 @@ export class ThreeDSecureService {
       throw new Error('ThreeDSecureService is already running');
     }
     this.isRunning = true;
-    this.logger('ThreeDSecureService V8: execute')
+    this.logger('ThreeDSecureService V9: execute')
 
     const fiveMinutes = 5 * 60 * 1000;
     this.logger('ThreeDSecureService: execute - configuring timeout');
